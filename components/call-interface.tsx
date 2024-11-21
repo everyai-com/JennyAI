@@ -10,15 +10,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Mic, MicOff, PhoneCall, PhoneOff } from "lucide-react";
+import { apiService } from "@/services/api";
+
+import { UltravoxSession } from "ultravox-client";
 
 export function CallInterface() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
 
-  const handleStartCall = () => {
+  const session = new UltravoxSession();
+
+  const handleStartCall = async () => {
     setIsCallActive(true);
     setTranscript([]);
+    const call = await apiService.createCall();
+    console.log(call, "THIS IS THE CALL");
+    session.joinCall(call.joinUrl);
     // Simulate conversation
     setTimeout(
       () => addToTranscript("Jenny: Hello! How can I assist you today?"),
@@ -28,6 +36,7 @@ export function CallInterface() {
 
   const handleEndCall = () => {
     setIsCallActive(false);
+    session.leaveCall();
     addToTranscript("Call ended.");
   };
 

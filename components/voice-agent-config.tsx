@@ -18,34 +18,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { apiService } from "@/services/api";
+import { useVoiceAgentStore } from "@/stores/voiceAgentStore";
 
 export function VoiceAgentConfig() {
-  const [systemPrompt, setSystemPrompt] = useState("");
-  const [voice, setVoice] = useState("Jenny");
-  const [language, setLanguage] = useState("English");
+  const {
+    systemPrompt,
+    voice,
+    language,
+    setSystemPrompt,
+    setVoice,
+    setLanguage,
+  } = useVoiceAgentStore();
   const [voiceOptions, setVoiceOptions] = useState([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Voice agent configuration saved:", {
-      systemPrompt,
-      voice,
-      language,
-    });
-  };
-
-  const baseUrl = "https://api.ultravox.ai/api";
-
   useEffect(() => {
-    fetch(`${baseUrl}/voices`, {
-      method: "GET",
-      headers: {
-        "X-API-Key": "YOCZbxDK.TXEyl60NGyRDOPZY7Fe68SI4ihTBAS0z",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => console.log(data));
+    const fetchVoices = async () => {
+      try {
+        const data = await apiService.getVoices();
+        console.log(data.results);
+        // You might want to set the voice options here:
+        setVoiceOptions(data.results);
+      } catch (error) {
+        console.error("Failed to fetch voices:", error);
+      }
+    };
+
+    fetchVoices();
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const config = { systemPrompt, voice, language };
+      // await apiService.saveConfig(config);
+
+      console.log("Voice agent configuration saved successfully");
+    } catch (error) {
+      console.error("Failed to save configuration:", error);
+    }
+  };
 
   return (
     <Card className="bg-white shadow-sm border-gray-200">
@@ -71,13 +83,15 @@ export function VoiceAgentConfig() {
                 <SelectValue placeholder="Select a voice" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Jenny">Jenny (Female)</SelectItem>
-                <SelectItem value="Mark">Mark (Male)</SelectItem>
-                <SelectItem value="Sophia">Sophia (Female)</SelectItem>
+                {voiceOptions.map((option) => (
+                  <SelectItem key={option.voiceId} value={option.voiceId}>
+                    {option.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div>
+          {/* <div>
             <label
               htmlFor="language"
               className="block text-sm font-medium mb-1 text-gray-700"
@@ -94,7 +108,7 @@ export function VoiceAgentConfig() {
                 <SelectItem value="French">French</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
           <div>
             <label
               htmlFor="system-prompt"
