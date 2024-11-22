@@ -5,7 +5,7 @@ export const apiService = {
   // Get voices
   getVoices: async () => {
     try {
-      const response = await fetch(`${BASE_URL}/voices`, {
+      const response = await fetch(`/api/voices`, {
         method: "GET",
       });
       if (!response.ok) throw new Error("API call failed");
@@ -18,7 +18,7 @@ export const apiService = {
 
   createTwilioCall: async (phoneNumber: string) => {
     try {
-      const response = await fetch(`${BASE_URL}/tcall`, {
+      const response = await fetch(`/api/tcall`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export const apiService = {
 
   createCall: async () => {
     try {
-      const response = await fetch(`${BASE_URL}/call`, {
+      const response = await fetch(`/api/call`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
