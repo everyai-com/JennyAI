@@ -1,24 +1,29 @@
 import { NextResponse } from "next/server";
-import twilio from "twilio";
-import dotenv from "dotenv";
 
 export const runtime = "edge";
-
-dotenv.config();
 
 async function createCall(joinUrl: string, phoneNumber: string) {
   const TWILIO_ACCOUNT_SID: string = process.env.TWILIO_ACCOUNT_SID || "";
   const TWILIO_AUTH_TOKEN: string = process.env.TWILIO_AUTH_TOKEN || "";
 
-  const twilioClient = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-  console.log("Creating twilio call...");
-
   try {
-    const call = await twilioClient.calls.create({
-      twiml: `<Response><Connect><Stream url="${joinUrl}" /></Connect></Response>`,
-      from: "+13103402765",
-      to: phoneNumber,
-    });
+    const twilioResponse = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${btoa(
+            `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`
+          )}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          Twiml: `<Response><Connect><Stream url="${joinUrl}" /></Connect></Response>`,
+          From: "+13103402765",
+          To: phoneNumber,
+        }),
+      }
+    );
   } catch (error) {
     console.error("Failed to create twilio call:", error);
     throw error;
