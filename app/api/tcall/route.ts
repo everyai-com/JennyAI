@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import twilio from "twilio";
 import dotenv from "dotenv";
 
+export const runtime = "edge";
+
 dotenv.config();
 
 async function createCall(joinUrl: string, phoneNumber: string) {

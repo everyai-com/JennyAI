@@ -2,6 +2,8 @@
 
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET() {
   const BASE_URL = "https://api.ultravox.ai/api";
   const API_KEY = "VAfcW6VB.driGgc9PJQeIkhtcdOt5XVDhCncBNVfR";
