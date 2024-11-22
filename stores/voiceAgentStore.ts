@@ -8,6 +8,8 @@ interface VoiceAgentState {
   setSystemPrompt: (prompt: string) => void;
   setVoice: (voice: string) => void;
   setLanguage: (language: string) => void;
+  phoneNumber: string;
+  setPhoneNumber: (phoneNumber: string) => void;
 }
 
 export const useVoiceAgentStore = create<VoiceAgentState>()(
@@ -19,6 +21,8 @@ export const useVoiceAgentStore = create<VoiceAgentState>()(
       setSystemPrompt: (prompt) => set({ systemPrompt: prompt }),
       setVoice: (voice) => set({ voice }),
       setLanguage: (language) => set({ language }),
+      phoneNumber: "",
+      setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
     }),
     {
       name: "voice-agent-storage",

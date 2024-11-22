@@ -16,6 +16,27 @@ export const apiService = {
     }
   },
 
+  createTwilioCall: async (phoneNumber: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/tcall`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber,
+          systemPrompt: useVoiceAgentStore.getState().systemPrompt,
+          voice: useVoiceAgentStore.getState().voice,
+        }),
+      });
+      if (!response.ok) throw new Error("API call failed");
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to create call:", error);
+      throw error;
+    }
+  },
+
   createCall: async () => {
     try {
       const response = await fetch(`${BASE_URL}/call`, {

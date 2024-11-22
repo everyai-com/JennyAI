@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,24 +19,26 @@ export function CallInterface() {
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
 
-  const session = new UltravoxSession();
+  const sessionRef = useRef<UltravoxSession | null>(null);
 
   const handleStartCall = async () => {
     setIsCallActive(true);
     setTranscript([]);
     const call = await apiService.createCall();
-    console.log(call, "THIS IS THE CALL");
-    session.joinCall(call.joinUrl);
-    // Simulate conversation
+    sessionRef.current = new UltravoxSession();
+    sessionRef.current.joinCall(call.joinUrl);
+
     setTimeout(
       () => addToTranscript("Jenny: Hello! How can I assist you today?"),
       1000
     );
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
     setIsCallActive(false);
-    session.leaveCall();
+    if (sessionRef.current) {
+      await sessionRef.current.leaveCall();
+    }
     addToTranscript("Call ended.");
   };
 

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { apiService } from "@/services/api";
 import { useVoiceAgentStore } from "@/stores/voiceAgentStore";
+import { Input } from "./ui/input";
 
 export function VoiceAgentConfig() {
   const {
@@ -29,6 +30,8 @@ export function VoiceAgentConfig() {
     setSystemPrompt,
     setVoice,
     setLanguage,
+    phoneNumber,
+    setPhoneNumber,
   } = useVoiceAgentStore();
   const [voiceOptions, setVoiceOptions] = useState([]);
 
@@ -57,6 +60,10 @@ export function VoiceAgentConfig() {
     } catch (error) {
       console.error("Failed to save configuration:", error);
     }
+  };
+
+  const handleStartTwilioCall = async () => {
+    await apiService.createTwilioCall(phoneNumber);
   };
 
   return (
@@ -90,6 +97,19 @@ export function VoiceAgentConfig() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <label
+              htmlFor="phone-number"
+              className="block text-sm font-medium mb-1 text-gray-700"
+            >
+              Phone Number
+            </label>
+            <Input
+              id="phone-number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
           </div>
           {/* <div>
             <label
@@ -127,12 +147,21 @@ export function VoiceAgentConfig() {
           </div>
         </CardContent>
         <CardFooter className="bg-gray-50 border-t border-gray-200">
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Save Configuration
-          </Button>
+          <div className="flex flex-row justify-between gap-2">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save Configuration
+            </Button>
+            <Button
+              type="button"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleStartTwilioCall}
+            >
+              Start Twilio Call
+            </Button>
+          </div>
         </CardFooter>
       </form>
     </Card>
