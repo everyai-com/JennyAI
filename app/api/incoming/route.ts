@@ -19,7 +19,10 @@ export async function POST(_request: Request) {
   const data = await response.json();
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
   <Response>
-      <Connect><Stream url="${data.joinUrl}" /></Connect>
+    <Start>
+      <Stream url="${data.joinUrl}" />
+    </Start>
+    <Pause length="60" />
   </Response>`;
 
   console.log(data);
