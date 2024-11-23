@@ -16,6 +16,7 @@ export async function POST(_request: Request) {
       medium: {
         twilio: {},
       },
+      voice: "ab4eaa72-5cf3-40c1-a921-bca62a884bb4",
     }),
   });
 
