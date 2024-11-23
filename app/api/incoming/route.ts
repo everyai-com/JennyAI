@@ -13,19 +13,16 @@ export async function POST(_request: Request) {
     },
     body: JSON.stringify({
       systemPrompt: "You are a helpful assistant.",
+      medium: {
+        twilio: {},
+      },
     }),
   });
 
   const data = await response.json();
-  const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-  <Response>
-    <Start>
-      <Stream url="${data.joinUrl}" />
-    </Start>
-    <Pause length="60" />
-  </Response>`;
+  const twiml = `<Response><Connect><Stream url="${data.joinUrl}" /></Connect></Response>`;
 
-  console.log(data);
+  console.log(twiml);
 
   return new NextResponse(twiml, {
     status: 200,
