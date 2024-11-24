@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bot, Key, Phone, Plus } from "lucide-react";
+import { Bot, CalendarIcon, Key, Phone, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
@@ -32,6 +32,14 @@ export function Sidebar() {
         >
           <Phone className="h-4 w-4" />
           <span>Phone Number</span>
+        </Link>
+
+        <Link
+          href="/calendar"
+          className="flex items-center p-2 hover:bg-gray-700 rounded"
+        >
+          <CalendarIcon className="w-5 h-5 mr-2" />
+          <span>Calendar</span>
         </Link>
       </nav>
       <div className="mt-auto">
