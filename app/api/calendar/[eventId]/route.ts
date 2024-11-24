@@ -1,11 +1,8 @@
-import {
-  getOAuth2Client,
-  getCalendarClient,
-} from "@/lib/google-calendar.config";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getAccessToken, deleteEvent, getEvent } from "@/lib/edge-calendar";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function DELETE(
   request: NextRequest,
@@ -20,40 +17,23 @@ export async function DELETE(
   }
 
   try {
-    const oauth2Client = getOAuth2Client();
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    const newAccessToken = await getAccessToken(refreshToken);
 
-    const calendar = getCalendarClient(oauth2Client);
-
-    // Verify the event exists first
+    // Verify the event exists
     try {
-      await calendar.events.get({
-        calendarId: "primary",
-        eventId: params.eventId,
-      });
+      await getEvent(newAccessToken, params.eventId);
     } catch (error) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
     // Delete the event
-    await calendar.events.delete({
-      calendarId: "primary",
-      eventId: params.eventId,
-      sendUpdates: "all",
-    });
-
+    await deleteEvent(newAccessToken, params.eventId);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting calendar event:", error);
     return NextResponse.json(
-      {
-        error: "Failed to delete event",
-        details: error.message,
-      },
-      { status: error.code || 500 }
+      { error: "Failed to delete event" },
+      { status: 500 }
     );
   }
 }

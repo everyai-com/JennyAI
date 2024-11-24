@@ -1,7 +1,7 @@
 import { getOAuth2Client } from "@/lib/google-calendar.config";
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

@@ -1,12 +1,8 @@
-import {
-  getOAuth2Client,
-  getCalendarClient,
-} from "@/lib/google-calendar.config";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { calendar_v3 } from "googleapis";
+import { getAccessToken, listEvents, createEvent } from "@/lib/edge-calendar";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET(request: NextRequest) {
   const cookieStore = cookies();
@@ -18,22 +14,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const oauth2Client = getOAuth2Client();
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-
-    const calendar = getCalendarClient(oauth2Client);
-    const response = await calendar.events.list({
-      calendarId: "primary",
-      timeMin: new Date().toISOString(),
-      maxResults: 10,
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-
-    return NextResponse.json(response.data);
+    const newAccessToken = await getAccessToken(refreshToken);
+    const events = await listEvents(newAccessToken);
+    return NextResponse.json(events);
   } catch (error) {
     console.error("Error fetching calendar events:", error);
     return NextResponse.json(
@@ -58,20 +41,13 @@ export async function POST(request: NextRequest) {
 
     if (!summary || !attendees || attendees.length === 0) {
       return NextResponse.json(
-        { error: "Missing required fields (title or attendees)" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const oauth2Client = getOAuth2Client();
-    oauth2Client.setCredentials({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-
-    const calendar = getCalendarClient(oauth2Client);
-
-    const event: calendar_v3.Schema$Event = {
+    const newAccessToken = await getAccessToken(refreshToken);
+    const event = {
       summary,
       description,
       start: {
@@ -87,20 +63,12 @@ export async function POST(request: NextRequest) {
       guestsCanInviteOthers: false,
     };
 
-    const response = await calendar.events.insert({
-      calendarId: "primary",
-      requestBody: event,
-      sendUpdates: "all",
-    });
-
-    return NextResponse.json(response.data);
+    const response = await createEvent(newAccessToken, event);
+    return NextResponse.json(response);
   } catch (error: any) {
     console.error("Error creating calendar event:", error);
     return NextResponse.json(
-      {
-        error: "Failed to create event",
-        details: error.message || "Unknown error",
-      },
+      { error: "Failed to create event" },
       { status: 500 }
     );
   }

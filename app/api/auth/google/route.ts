@@ -8,6 +8,8 @@ const SCOPES = [
   "https://www.googleapis.com/auth/userinfo.profile",
 ];
 
+export const runtime = "edge";
+
 export async function GET() {
   try {
     const authUrl = oauth2Client.generateAuthUrl({
