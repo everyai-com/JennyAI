@@ -19,6 +19,8 @@ const nextConfig = {
         crypto: false,
         os: false,
         path: false,
+        http: false,
+        https: false,
       };
     }
     return config;
