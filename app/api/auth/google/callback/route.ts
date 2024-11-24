@@ -1,4 +1,4 @@
-import { getOAuth2Client } from "@/lib/google-calendar.config";
+import { getTokens } from "@/lib/google-calendar.config";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -13,20 +13,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const oauth2Client = getOAuth2Client();
-    const tokens = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens.tokens);
-
-    // Store tokens in session/cookie
+    const tokens = await getTokens(code);
     const response = NextResponse.redirect(new URL("/calendar", request.url));
 
-    // Save tokens in cookies
-    response.cookies.set("access_token", tokens.tokens.access_token || "", {
+    response.cookies.set("access_token", tokens.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
 
-    response.cookies.set("refresh_token", tokens.tokens.refresh_token || "", {
+    response.cookies.set("refresh_token", tokens.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getAccessToken, listEvents, createEvent } from "@/lib/edge-calendar";
+import { getOAuth2Client } from "@/lib/google-calendar.config";
 
 export const runtime = "edge";
 
