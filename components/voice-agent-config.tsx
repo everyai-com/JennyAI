@@ -67,30 +67,31 @@ export function VoiceAgentConfig() {
   };
 
   return (
-    <Card className="bg-white shadow-sm border-gray-200">
-      <CardHeader className="bg-gray-50 border-b border-gray-200">
-        <CardTitle className="text-xl text-gray-800">
-          Configure Jenny Voice AI
-        </CardTitle>
-        <CardDescription>
+    <Card className=" border-border">
+      <CardHeader className="bg-gray-800 border-b-gray-700 border-border rounded-t-lg">
+        <CardTitle className="text-zinc-50">Configure Jenny Voice AI</CardTitle>
+        <CardDescription className="text-zinc-400">
           Customize your voice assistant's behavior and voice
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4 mt-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-zinc-900/95 border-gray-700 border-b rounded-b-lg"
+      >
+        <CardContent className="space-y-4 pt-4">
           <div>
             <label
               htmlFor="voice"
-              className="block text-sm font-medium mb-1 text-gray-700"
+              className="block text-sm font-medium mb-1 text-zinc-300"
             >
               Voice
             </label>
             <Select value={voice} onValueChange={setVoice}>
-              <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+              <SelectTrigger className="w-full bg-zinc-800 border-zinc-700">
                 <SelectValue placeholder="Select a voice" />
               </SelectTrigger>
-              <SelectContent>
-                {voiceOptions.map((option) => (
+              <SelectContent className="bg-zinc-800 max-w-screen-sm">
+                {voiceOptions.map((option: any) => (
                   <SelectItem key={option.voiceId} value={option.voiceId}>
                     {option.name}
                   </SelectItem>
@@ -101,7 +102,7 @@ export function VoiceAgentConfig() {
           <div>
             <label
               htmlFor="phone-number"
-              className="block text-sm font-medium mb-1 text-gray-700"
+              className="block text-sm font-medium mb-1 text-zinc-300"
             >
               Phone Number
             </label>
@@ -109,30 +110,13 @@ export function VoiceAgentConfig() {
               id="phone-number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
+              className="bg-zinc-800 border-zinc-700"
             />
           </div>
-          {/* <div>
-            <label
-              htmlFor="language"
-              className="block text-sm font-medium mb-1 text-gray-700"
-            >
-              Language
-            </label>
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                <SelectValue placeholder="Select a language" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="English">English</SelectItem>
-                <SelectItem value="Spanish">Spanish</SelectItem>
-                <SelectItem value="French">French</SelectItem>
-              </SelectContent>
-            </Select>
-          </div> */}
           <div>
             <label
               htmlFor="system-prompt"
-              className="block text-sm font-medium mb-1 text-gray-700"
+              className="block text-sm font-medium mb-1 text-zinc-300"
             >
               System Prompt
             </label>
@@ -142,26 +126,26 @@ export function VoiceAgentConfig() {
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
               rows={6}
-              className="w-full p-2 border border-zinc-200 rounded border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:border-zinc-800"
+              className="bg-zinc-800 border-zinc-700"
             />
           </div>
         </CardContent>
-        <CardFooter className="bg-gray-50 border-t border-gray-200">
-          <div className="flex flex-row justify-between gap-2">
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Save Configuration
-            </Button>
-            <Button
-              type="button"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={handleStartTwilioCall}
-            >
-              Start Twilio Call
-            </Button>
-          </div>
+        <CardFooter className="bg-zinc-900/95 border-t border-border rounded-b-lg flex gap-4 pt-6">
+          <Button
+            type="submit"
+            variant="secondary"
+            className="flex-1 bg-primary hover:bg-primary/90 text-white"
+          >
+            Save Configuration
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleStartTwilioCall}
+            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white"
+          >
+            Start Twilio Call
+          </Button>
         </CardFooter>
       </form>
     </Card>

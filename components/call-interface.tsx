@@ -51,30 +51,30 @@ export function CallInterface() {
   };
 
   return (
-    <Card className="bg-white shadow-sm border-gray-200">
-      <CardHeader className="bg-gray-50 border-b border-gray-200">
-        <CardTitle className="text-xl text-gray-800">Call Interface</CardTitle>
+    <Card className="border-border h-fit">
+      <CardHeader className="bg-gray-800 border-b-gray-700 border-border rounded-t-lg">
+        <CardTitle className="text-zinc-50">Call Interface</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="bg-gray-100 rounded-md p-4 h-64 overflow-y-auto mb-4 border border-zinc-200 border-gray-200 dark:border-zinc-800">
+      <CardContent className="p-4 bg-zinc-900/95">
+        <div className="bg-zinc-800 rounded-md p-4 h-64 overflow-y-auto mb-4 border border-zinc-700">
           {transcript.map((line, index) => (
-            <p key={index} className="mb-2">
+            <p key={index} className="mb-2 text-zinc-300">
               {line}
             </p>
           ))}
           {isCallActive && (
-            <p className="text-blue-600 animate-pulse">Listening...</p>
+            <p className="text-blue-400 animate-pulse">Listening...</p>
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center bg-gray-50 border-t border-gray-200 p-4">
+      <CardFooter className="flex justify-between items-center bg-zinc-900/95 border-t border-border rounded-b-lg p-4">
         <Button
           onClick={toggleMute}
-          variant="outline"
+          variant="secondary"
           className={`flex items-center ${
             isMuted
-              ? "'bg-red-100 text-red-600 border-red-200'"
-              : "'bg-gray-100 border-gray-200'"
+              ? "bg-red-900/50 text-red-400 hover:bg-red-900/70"
+              : "bg-zinc-700 hover:bg-zinc-600 text-zinc-300"
           }`}
           disabled={!isCallActive}
         >

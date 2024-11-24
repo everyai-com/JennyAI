@@ -2,18 +2,297 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
     --radius: 0.5rem;
   }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+/* FullCalendar Dark Theme */
+.fc {
+  --fc-border-color: #2d3748;
+  --fc-button-text-color: #e2e8f0;
+  --fc-button-bg-color: #2d3748;
+  --fc-button-border-color: #4a5568;
+  --fc-button-hover-bg-color: #4a5568;
+  --fc-button-hover-border-color: #718096;
+  --fc-button-active-bg-color: #4a5568;
+  --fc-today-bg-color: rgba(66, 153, 225, 0.1);
+  --fc-event-bg-color: #4299e1;
+  --fc-event-border-color: #3182ce;
+  --fc-page-bg-color: #1a202c;
+  --fc-neutral-bg-color: #2d3748;
+  --fc-neutral-text-color: #e2e8f0;
+  --fc-list-event-hover-bg-color: #2d3748;
+  background-color: #1a202c;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.fc .fc-toolbar-title {
+  color: #e2e8f0;
+}
+
+.fc .fc-button {
+  @apply transition-all duration-200 ease-in-out;
+  background-color: #2d3748;
+  border-color: #4a5568;
+  color: #e2e8f0;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+}
+
+.fc .fc-button:hover {
+  background-color: #4a5568;
+  border-color: #718096;
+}
+
+.fc .fc-button:focus {
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+.fc .fc-event {
+  @apply transition-transform duration-200 ease-in-out hover:scale-105;
+  background-color: #4299e1;
+  border-color: #3182ce;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.fc .fc-timegrid-slot-label {
+  color: #a0aec0;
+}
+
+.fc .fc-day-today {
+  background-color: rgba(66, 153, 225, 0.1) !important;
+}
+
+/* Calendar Container */
+.calendar-container {
+  @apply transition-all duration-300 ease-in-out;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Custom Animations Classes */
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Event Card Hover Effects */
+.event-card {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.event-card:hover {
+  @apply transform scale-102 shadow-lg;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  @apply animate-spin rounded-full border-4 border-blue-500 border-t-transparent h-12 w-12;
+  animation: spin 1s linear infinite;
+}
+
+/* Dialog Animations */
+.dialog-content {
+  @apply animate-in slide-in-from-bottom-2 duration-300;
+}
+
+/* Toast Animations */
+.toast {
+  @apply animate-in slide-in-from-right duration-300;
+}
+
+/* Button Hover Effects */
+.button-hover {
+  @apply transition-all duration-200 hover:scale-105 active:scale-95;
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+  @apply animate-pulse bg-gray-700/50 rounded-lg;
+}
+
+/* Calendar Grid Lines */
+.fc td, .fc th {
+  border-color: #2d3748 !important;
+}
+
+/* Time Grid Background */
+.fc .fc-timegrid-col.fc-day-today {
+  background-color: rgba(66, 153, 225, 0.1) !important;
+}
+
+/* Event Time Text */
+.fc .fc-event-time {
+  color: #e2e8f0;
+}
+
+/* Event Title Text */
+.fc .fc-event-title {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Header Navigation Buttons */
+.fc .fc-button-primary {
+  @apply transition-all duration-200;
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #4a5568;
+  border-color: #718096;
+}
+
+/* Today Button */
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #4299e1;
+  border-color: #3182ce;
+}
+
+/* Time Slots */
+.fc .fc-timegrid-slot {
+  height: 3rem !important;
+  border-color: #2d3748;
+}
+
+/* Current Time Indicator */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #f56565;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: #f56565;
+}
+
+/* Week Numbers */
+.fc .fc-daygrid-week-number {
+  color: #a0aec0;
+  background-color: #2d3748;
+}
+
+/* More Events Popover */
+.fc .fc-more-popover {
+  background-color: #1a202c;
+  border-color: #2d3748;
+}
+
+.fc .fc-more-popover .fc-popover-title {
+  color: #e2e8f0;
+  background-color: #2d3748;
+}
+
+/* Keep your existing FullCalendar styles but update colors for dark theme */
+.dark .fc {
+  --fc-border-color: #374151;
+  --fc-button-text-color: #f3f4f6;
+  --fc-button-bg-color: #374151;
+  --fc-button-border-color: #4b5563;
+  --fc-button-hover-bg-color: #4b5563;
+  --fc-button-hover-border-color: #6b7280;
+  --fc-button-active-bg-color: #4b5563;
+  --fc-today-bg-color: rgba(59, 130, 246, 0.1);
+  --fc-event-bg-color: #3b82f6;
+  --fc-event-border-color: #2563eb;
+  --fc-page-bg-color: #111827;
+  --fc-neutral-bg-color: #1f2937;
+  --fc-neutral-text-color: #f3f4f6;
+  background-color: #1f2937;
+}
+
+.dark .dialog-content,
+.dark .dialog-header {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark .dialog-description {
+  color: #9ca3af;
+}
+
+.dark input {
+  background-color: #374151;
+  color: #f3f4f6;
+  border-color: #4b5563;
+}
+
+.dark input::placeholder {
+  color: #9ca3af;
+}
+
+.dark label {
+  color: #f3f4f6;
 }

@@ -1,5 +1,7 @@
-import { oauth2Client } from "@/lib/google-calendar.config";
+import { getOAuth2Client } from "@/lib/google-calendar.config";
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -11,6 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const oauth2Client = getOAuth2Client();
     const tokens = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens.tokens);
 
