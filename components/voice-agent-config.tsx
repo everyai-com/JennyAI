@@ -126,7 +126,7 @@ export function VoiceAgentConfig() {
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
               rows={6}
-              className="bg-zinc-800 border-zinc-700"
+              className="bg-zinc-800 border-zinc-700 overflow-y-auto"
             />
           </div>
         </CardContent>

@@ -22,12 +22,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} dark:bg-gray-900 dark:text-gray-100`}
       >
-        <div className="flex h-screen dark:bg-gray-900">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto dark:bg-gray-900">
-            <Providers>{children}</Providers>
-          </main>
-        </div>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>
