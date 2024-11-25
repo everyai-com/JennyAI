@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createToken } from "@/app/utils/edge-jwt";
+import { AccessToken, VideoGrant } from "@/app/utils/twilio-edge";
 
 export const runtime = "edge";
 
@@ -18,23 +18,24 @@ export async function POST(request: Request) {
     const twilioApiKey = process.env.TWILIO_API_KEY!;
     const twilioApiSecret = process.env.TWILIO_API_SECRET!;
 
-    // Create a custom token payload
-    const payload = {
-      grants: {
-        video: {
-          room: roomName,
-        },
-      },
-      sub: twilioAccountSid,
-      iss: twilioApiKey,
-      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
-      jti: `${twilioApiKey}-${Date.now()}`,
-    };
+    // Create an access token
+    const token = new AccessToken(
+      twilioAccountSid,
+      twilioApiKey,
+      twilioApiSecret,
+      { identity: `user-${Math.random().toString(36).substring(7)}` }
+    );
+
+    // Create a video grant
+    const videoGrant: VideoGrant = { room: roomName };
+
+    // Add the video grant to the token
+    token.addGrant(videoGrant);
 
     // Generate the token
-    const token = await createToken(payload, twilioApiSecret, "1h");
+    const jwt = await token.toJwt();
 
-    return NextResponse.json({ token });
+    return NextResponse.json({ token: jwt });
   } catch (error) {
     console.error("Error generating token:", error);
     return NextResponse.json(

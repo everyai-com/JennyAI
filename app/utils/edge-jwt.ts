@@ -33,7 +33,9 @@ export function createToken(payload: any, secret: string, expiresIn = "1h") {
     .then((key) => crypto.subtle.sign("HMAC", key, data))
     .then((signature) => {
       const base64Signature = btoa(
-        String.fromCharCode(...new Uint8Array(signature))
+        Array.from(new Uint8Array(signature))
+          .map((byte) => String.fromCharCode(byte))
+          .join("")
       );
       return `${base64Header}.${base64Payload}.${base64Signature}`;
     });

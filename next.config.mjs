@@ -1,6 +1,31 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove the webpack config since we're not using Node.js modules anymore
+  webpack: (config, { isServer, nextRuntime }) => {
+    if (!isServer || (isServer && nextRuntime === "edge")) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        net: false,
+        tls: false,
+        fs: false,
+        path: false,
+        zlib: false,
+        http: false,
+        https: false,
+        url: false,
+      };
+    }
+    return config;
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;

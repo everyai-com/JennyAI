@@ -1,42 +1,45 @@
 import { NextResponse } from "next/server";
-import twilio from "twilio";
+import { AccessToken } from "@/app/utils/twilio-edge";
 
 export const runtime = "edge";
 
-const VoiceResponse = twilio.twiml.VoiceResponse;
-
 export async function POST(request: Request) {
-  const twiml = new VoiceResponse();
-
   try {
-    const { assistantId, customerEmail } = await request.json();
+    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID!;
+    const twilioApiKey = process.env.TWILIO_API_KEY!;
+    const twilioApiSecret = process.env.TWILIO_API_SECRET!;
+    const twilioAppSid = process.env.TWILIO_APP_SID!;
 
-    // Add your desired TwiML instructions
-    twiml.say("Welcome to the call. Please wait while we connect you.");
+    // Create an access token
+    const token = new AccessToken(
+      twilioAccountSid,
+      twilioApiKey,
+      twilioApiSecret,
+      { identity: `user-${Math.random().toString(36).substring(7)}` }
+    );
 
-    // Create a conference room named after the customer email or a unique ID
-    const conferenceName = `conf-${customerEmail}-${Date.now()}`;
-    const dial = twiml.dial();
-    dial.conference(conferenceName, {
-      startConferenceOnEnter: true,
-      endConferenceOnExit: true,
-      maxParticipants: 2,
-      record: "record-from-start",
-    });
-
-    return new NextResponse(twiml.toString(), {
-      headers: {
-        "Content-Type": "text/xml",
+    // Create a voice grant
+    const voiceGrant = {
+      outgoing: {
+        application_sid: twilioAppSid,
       },
-    });
+      incoming: {
+        allow: true,
+      },
+    };
+
+    // Add the voice grant to the token
+    token.addGrant(voiceGrant);
+
+    // Generate the token
+    const jwt = await token.toJwt();
+
+    return NextResponse.json({ token: jwt });
   } catch (error) {
-    console.error("Error generating TwiML:", error);
-    twiml.say("An error occurred. Please try again later.");
-    return new NextResponse(twiml.toString(), {
-      headers: {
-        "Content-Type": "text/xml",
-      },
-      status: 500,
-    });
+    console.error("Error generating token:", error);
+    return NextResponse.json(
+      { error: "Failed to generate token" },
+      { status: 500 }
+    );
   }
 }
