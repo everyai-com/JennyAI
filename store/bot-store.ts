@@ -22,6 +22,14 @@ export interface Bot {
     responseTime: number;
     phoneNumber?: string;
     systemPrompt?: string;
+    appointmentBooking: {
+      enabled: boolean;
+      calendarId: string;
+      availabilityStart: string;
+      availabilityEnd: string;
+      appointmentDuration: number;
+      timezone: string;
+    };
   };
   conversationHistory: Array<{
     id: string;

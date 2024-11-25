@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Voice } from "@/types";
 
@@ -32,8 +32,13 @@ export default function Home() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newBotName, setNewBotName] = useState("");
   const { toast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const activeBot = bots.find((bot) => bot.id === activeBotId);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
 
   if (isLoginPage) {
     return null;
@@ -76,6 +81,14 @@ export default function Home() {
         responseTime: 1000,
         systemPrompt: "",
         phoneNumber: "",
+        appointmentBooking: {
+          enabled: false,
+          calendarId: "",
+          availabilityStart: "09:00",
+          availabilityEnd: "17:00",
+          appointmentDuration: 30,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
       },
       conversationHistory: [],
     };
