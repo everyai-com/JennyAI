@@ -1,36 +1,41 @@
+import { AccessToken } from "twilio/lib/jwt/AccessToken";
+import { VideoGrant } from "twilio/lib/jwt/AccessToken";
 import { NextResponse } from "next/server";
-import twilio from "twilio";
 
+// Mark this route as Edge runtime
 export const runtime = "edge";
-
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const apiKey = process.env.TWILIO_API_KEY;
-const apiSecret = process.env.TWILIO_API_SECRET;
 
 export async function POST(request: Request) {
   try {
-    const { identity } = await request.json();
+    const { roomName } = await request.json();
 
-    const AccessToken = twilio.jwt.AccessToken;
-    const VoiceGrant = AccessToken.VoiceGrant;
+    if (!roomName) {
+      return NextResponse.json(
+        { error: "Room name is required" },
+        { status: 400 }
+      );
+    }
 
-    // Create an access token which we will sign and return to the client
+    // Get environment variables
+    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID!;
+    const twilioApiKey = process.env.TWILIO_API_KEY!;
+    const twilioApiSecret = process.env.TWILIO_API_SECRET!;
+
+    // Create an access token
     const token = new AccessToken(
-      accountSid!,
-      apiKey!,
-      apiSecret!,
-      { identity } // Pass identity as an option
+      twilioAccountSid,
+      twilioApiKey,
+      twilioApiSecret,
+      { identity: `user-${Math.random().toString(36).substring(7)}` }
     );
 
-    // Grant access to Voice
-    const grant = new VoiceGrant({
-      outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
-      incomingAllow: true,
-    });
+    // Create a video grant
+    const videoGrant = new VideoGrant({ room: roomName });
 
-    token.addGrant(grant);
+    // Add the video grant to the token
+    token.addGrant(videoGrant);
 
+    // Generate the token
     return NextResponse.json({ token: token.toJwt() });
   } catch (error) {
     console.error("Error generating token:", error);
