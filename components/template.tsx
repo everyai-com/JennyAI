@@ -3,7 +3,11 @@
 import { Sidebar } from "./sidebar";
 import { usePathname } from "next/navigation";
 
-export default function Template({ children }: { children: React.ReactNode }) {
+interface TemplateProps {
+  children: React.ReactNode;
+}
+
+export default function Template({ children }: TemplateProps) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
 

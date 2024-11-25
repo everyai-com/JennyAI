@@ -1,44 +1,45 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface Voice {
-  id: string;
-  name: string;
-  language: string;
-}
+import { Voice } from "@/types";
 
 interface VoiceState {
   voices: Voice[];
-  currentVoice: string | null;
   isLoading: boolean;
-  hasLoaded: boolean;
   setVoices: (voices: Voice[]) => void;
-  setCurrentVoice: (voice: string) => void;
   setIsLoading: (loading: boolean) => void;
-  setHasLoaded: (loaded: boolean) => void;
-  initialize: () => void;
+  fetchVoices: () => Promise<void>;
 }
+
+const initialState = {
+  voices: [] as Voice[],
+  isLoading: false,
+};
 
 export const useVoiceStore = create<VoiceState>()(
   persist(
-    (set) => ({
-      voices: [],
-      currentVoice: null,
-      isLoading: false,
-      hasLoaded: false,
-      setVoices: (voices) => set({ voices, hasLoaded: true }),
-      setCurrentVoice: (voice) => set({ currentVoice: voice }),
+    (set, get) => ({
+      ...initialState,
+      setVoices: (voices) => set({ voices }),
       setIsLoading: (loading) => set({ isLoading: loading }),
-      setHasLoaded: (loaded) => set({ hasLoaded: loaded }),
-      initialize: () => set({ hasLoaded: false, voices: [] }),
+      fetchVoices: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch("/api/voices");
+          const voices = await response.json();
+          set({ voices, isLoading: false });
+        } catch (error) {
+          console.error("Failed to fetch voices:", error);
+          set({ isLoading: false });
+        }
+      },
     }),
     {
-      name: "voice-store",
-      onRehydrateStorage: () => {
-        console.log("Voice store hydrated");
-        return (state) => {
-          console.log("Hydrated state:", state);
-        };
+      name: "voice-storage",
+      onRehydrateStorage: () => (state) => {
+        // Ensure voices is an array after rehydration
+        if (!state?.voices) {
+          state.voices = [];
+        }
       },
     }
   )

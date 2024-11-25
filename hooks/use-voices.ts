@@ -1,25 +1,14 @@
-import { useState, useEffect } from "react";
-import { VoiceOption } from "@/types";
-import { apiService } from "@/services/api";
+import { useEffect } from "react";
+import { useVoiceStore } from "@/store/voice-store";
 
 export function useVoices() {
-  const [voices, setVoices] = useState<VoiceOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { voices, isLoading, fetchVoices } = useVoiceStore();
 
   useEffect(() => {
-    const fetchVoices = async () => {
-      try {
-        const voicesData = await apiService.getVoices();
-        setVoices(voicesData);
-      } catch (error) {
-        console.error("Failed to fetch voices:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVoices();
-  }, []);
+    if (voices.length === 0 && !isLoading) {
+      fetchVoices();
+    }
+  }, [voices.length, isLoading, fetchVoices]);
 
   return { voices, isLoading };
 }

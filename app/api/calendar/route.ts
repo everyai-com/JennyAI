@@ -5,6 +5,8 @@ import { getOAuth2Client } from "@/lib/google-calendar.config";
 
 export const runtime = "edge";
 
+export const revalidate = 300;
+
 export async function GET(request: NextRequest) {
   const cookieStore = cookies();
   const accessToken = cookieStore.get("access_token")?.value;
@@ -17,7 +19,11 @@ export async function GET(request: NextRequest) {
   try {
     const newAccessToken = await getAccessToken(refreshToken);
     const events = await listEvents(newAccessToken);
-    return NextResponse.json(events);
+    return NextResponse.json(events, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (error) {
     console.error("Error fetching calendar events:", error);
     return NextResponse.json(

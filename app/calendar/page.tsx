@@ -616,7 +616,7 @@ export default function CalendarPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {events.map((event: CalendarEvent) => (
+              {events?.map((event: CalendarEvent) => (
                 <div
                   key={event.id}
                   className="p-4 border dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow dark:bg-gray-700/50"
