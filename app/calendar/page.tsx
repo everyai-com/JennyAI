@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -22,6 +22,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { CalendarAgent } from "@/components/calendar-agent";
 import Template from "@/components/template";
+import { Phone, PhoneOff } from "lucide-react";
+import { useVoices } from "@/hooks/use-voices";
 
 interface BookingDialog {
   isOpen: boolean;
@@ -46,6 +48,12 @@ interface CalendarEvent {
     customerEmail: string;
     customerName: string;
   };
+}
+
+interface CallState {
+  isInCall: boolean;
+  isCalling: boolean;
+  callStatus: string;
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -95,6 +103,13 @@ export default function CalendarPage() {
   const [eventTitle, setEventTitle] = useState("");
   const { toast } = useToast();
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [callState, setCallState] = useState<CallState>({
+    isInCall: false,
+    isCalling: false,
+    callStatus: "",
+  });
+  const deviceRef = useRef<any>(null);
+  const { voices } = useVoices();
 
   useEffect(() => {
     checkAuthStatus();
@@ -399,6 +414,81 @@ export default function CalendarPage() {
       setIsUpdatingStatus(false);
     }
   };
+
+  const handleStartCall = async (customerEmail: string) => {
+    try {
+      setCallState((prev) => ({ ...prev, isCalling: true }));
+
+      // First, get a token
+      const tokenResponse = await fetch("/api/twilio/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ identity: "host" }), // You might want to use a real identity here
+      });
+
+      if (!tokenResponse.ok) throw new Error("Failed to get token");
+      const { token } = await tokenResponse.json();
+
+      // Initialize Twilio device
+      const Device = (window as any).Twilio.Device;
+      deviceRef.current = new Device(token, {
+        debug: true,
+      });
+
+      // Setup device event handlers
+      deviceRef.current.on("ready", () => {
+        // Make the call
+        const call = deviceRef.current.connect({
+          params: {
+            customerEmail,
+          },
+        });
+
+        call.on("accept", () => {
+          setCallState((prev) => ({
+            ...prev,
+            isInCall: true,
+            isCalling: false,
+            callStatus: "Connected",
+          }));
+        });
+
+        call.on("disconnect", () => {
+          setCallState((prev) => ({
+            ...prev,
+            isInCall: false,
+            isCalling: false,
+            callStatus: "",
+          }));
+        });
+      });
+    } catch (error) {
+      console.error("Error starting call:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start call",
+        variant: "destructive",
+      });
+      setCallState((prev) => ({
+        ...prev,
+        isCalling: false,
+        callStatus: "Failed",
+      }));
+    }
+  };
+
+  const handleEndCall = useCallback(() => {
+    if (deviceRef.current) {
+      deviceRef.current.disconnectAll();
+      setCallState((prev) => ({
+        ...prev,
+        isInCall: false,
+        callStatus: "",
+      }));
+    }
+  }, []);
 
   if (!isAuthenticated) {
     return (
@@ -745,6 +835,40 @@ export default function CalendarPage() {
                   {formatEventDate(eventDetailsDialog.event?.end)}
                 </div>
               </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 py-4">
+              {!callState.isInCall ? (
+                <Button
+                  onClick={() =>
+                    handleStartCall(
+                      eventDetailsDialog.event?.extendedProps?.customerEmail
+                    )
+                  }
+                  disabled={
+                    callState.isCalling ||
+                    !eventDetailsDialog.event?.extendedProps?.customerEmail
+                  }
+                  className="flex items-center gap-2"
+                >
+                  <Phone className="w-4 h-4" />
+                  {callState.isCalling ? "Connecting..." : "Start Call"}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleEndCall}
+                  variant="destructive"
+                  className="flex items-center gap-2"
+                >
+                  <PhoneOff className="w-4 h-4" />
+                  End Call
+                </Button>
+              )}
+              {callState.callStatus && (
+                <span className="text-sm text-muted-foreground">
+                  {callState.callStatus}
+                </span>
+              )}
             </div>
 
             <DialogFooter className="flex justify-between">

@@ -11,27 +11,57 @@ import {
 } from "@/components/ui/card";
 import { Mic, MicOff, PhoneCall, PhoneOff } from "lucide-react";
 import { apiService } from "@/services/api";
-
 import { UltravoxSession } from "ultravox-client";
+import { Bot } from "@/store/bot-store";
+import { useToast } from "@/components/ui/use-toast";
 
-export function CallInterface() {
+interface CallInterfaceProps {
+  bot: Bot;
+}
+
+export function CallInterface({ bot }: CallInterfaceProps) {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const sessionRef = useRef<UltravoxSession | null>(null);
 
   const handleStartCall = async () => {
-    setIsCallActive(true);
-    setTranscript([]);
-    const call = await apiService.createCall();
-    sessionRef.current = new UltravoxSession();
-    sessionRef.current.joinCall(call.joinUrl);
+    if (!bot.settings.phoneNumber) {
+      toast({
+        title: "Error",
+        description: "Please configure a phone number first",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setTimeout(
-      () => addToTranscript("Jenny: Hello! How can I assist you today?"),
-      1000
-    );
+    try {
+      setIsCallActive(true);
+      setTranscript([]);
+      const call = await apiService.createCall({
+        phoneNumber: bot.settings.phoneNumber,
+        voice: bot.voice,
+        systemPrompt: bot.settings.greeting,
+      });
+
+      sessionRef.current = new UltravoxSession();
+      sessionRef.current.joinCall(call.joinUrl);
+
+      setTimeout(
+        () => addToTranscript(`${bot.name}: ${bot.settings.greeting}`),
+        1000
+      );
+    } catch (error) {
+      console.error("Error starting call:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start call",
+        variant: "destructive",
+      });
+      setIsCallActive(false);
+    }
   };
 
   const handleEndCall = async () => {
@@ -44,6 +74,9 @@ export function CallInterface() {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    if (sessionRef.current) {
+      sessionRef.current.setMuted(!isMuted);
+    }
   };
 
   const addToTranscript = (message: string) => {
@@ -53,7 +86,9 @@ export function CallInterface() {
   return (
     <Card className="border-border h-fit">
       <CardHeader className="bg-gray-800 border-b-gray-700 border-border rounded-t-lg">
-        <CardTitle className="text-zinc-50">Call Interface</CardTitle>
+        <CardTitle className="text-zinc-50">
+          Call Interface - {bot.name}
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-4 bg-zinc-900/95">
         <div className="bg-zinc-800 rounded-md p-4 h-64 overflow-y-auto mb-4 border border-zinc-700">
@@ -83,14 +118,14 @@ export function CallInterface() {
           ) : (
             <Mic className="mr-2 h-4 w-4" />
           )}
-          {isMuted ? "'Unmute'" : "'Mute'"}
+          {isMuted ? "Unmute" : "Mute"}
         </Button>
         <Button
           onClick={isCallActive ? handleEndCall : handleStartCall}
           className={`flex items-center ${
             isCallActive
-              ? "'bg-red-600 hover:bg-red-700'"
-              : "'bg-green-600 hover:bg-green-700'"
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-green-600 hover:bg-green-700"
           } text-white`}
         >
           {isCallActive ? (
@@ -98,7 +133,7 @@ export function CallInterface() {
           ) : (
             <PhoneCall className="mr-2 h-4 w-4" />
           )}
-          {isCallActive ? "'End Call'" : "'Start Call'"}
+          {isCallActive ? "End Call" : "Start Call"}
         </Button>
       </CardFooter>
     </Card>

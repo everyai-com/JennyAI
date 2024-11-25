@@ -18,60 +18,120 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apiService } from "@/services/api";
-import { useVoiceAgentStore } from "@/stores/voiceAgentStore";
 import { Input } from "./ui/input";
+import { useVoices } from "@/hooks/use-voices";
+import { Bot, useBotStore } from "@/store/bot-store";
+import { useToast } from "@/components/ui/use-toast";
+import { Voice, VoiceOption } from "@/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-export function VoiceAgentConfig() {
-  const {
-    systemPrompt,
-    voice,
-    language,
-    setSystemPrompt,
-    setVoice,
-    setLanguage,
-    phoneNumber,
-    setPhoneNumber,
-  } = useVoiceAgentStore();
-  const [voiceOptions, setVoiceOptions] = useState([]);
+interface VoiceAgentConfigProps {
+  bot: Bot;
+}
 
+export function VoiceAgentConfig({ bot }: VoiceAgentConfigProps) {
+  const { updateBot, bots, deleteBot } = useBotStore();
+  const { voices: voiceOptions, isLoading } = useVoices();
+  const { toast } = useToast();
+
+  // Initialize localSettings with all required fields
+  const [localSettings, setLocalSettings] = useState({
+    voice: bot.voice || { voiceId: "", name: "", previewUrl: "" },
+    phoneNumber: bot.settings?.phoneNumber || "",
+    systemPrompt: bot.settings?.systemPrompt || "",
+  });
+
+  // Update local settings when bot changes
   useEffect(() => {
-    const fetchVoices = async () => {
-      try {
-        const data = await apiService.getVoices();
-        console.log(data.results);
-        // You might want to set the voice options here:
-        setVoiceOptions(data.results);
-      } catch (error) {
-        console.error("Failed to fetch voices:", error);
-      }
-    };
-
-    fetchVoices();
-  }, []);
+    if (bot) {
+      setLocalSettings({
+        voice: bot.voice || { voiceId: "", name: "", previewUrl: "" },
+        phoneNumber: bot.settings?.phoneNumber || "",
+        systemPrompt: bot.settings?.systemPrompt || "",
+      });
+    }
+  }, [bot.id]); // Only depend on bot.id to prevent unnecessary updates
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const config = { systemPrompt, voice, language };
-      // await apiService.saveConfig(config);
+      // Find the selected voice details from voiceOptions
+      const selectedVoice = voiceOptions?.find(
+        (v) => v.voiceId === localSettings.voice.voiceId
+      );
 
-      console.log("Voice agent configuration saved successfully");
+      // Create the updated voice object
+      const updatedVoice: Voice = {
+        voiceId: selectedVoice?.voiceId || localSettings.voice.voiceId,
+        name: selectedVoice?.name || localSettings.voice.name,
+        previewUrl: selectedVoice?.previewUrl || localSettings.voice.previewUrl,
+      };
+
+      // Create the complete updated bot object
+      const updatedBot: Bot = {
+        ...bot,
+        voice: updatedVoice,
+        settings: {
+          ...bot.settings,
+          phoneNumber: localSettings.phoneNumber,
+          systemPrompt: localSettings.systemPrompt,
+        },
+      };
+
+      // Update the bot in the store
+      updateBot(bot.id, updatedBot);
+
+      toast({
+        title: "Success",
+        description: "Assistant configuration saved successfully",
+      });
     } catch (error) {
       console.error("Failed to save configuration:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save configuration",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleStartTwilioCall = async () => {
-    await apiService.createTwilioCall(phoneNumber);
+  const handleDelete = () => {
+    try {
+      deleteBot(bot.id);
+      toast({
+        title: "Success",
+        description: "Assistant deleted successfully",
+      });
+    } catch (error) {
+      console.error("Failed to delete assistant:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete assistant",
+        variant: "destructive",
+      });
+    }
   };
 
+  // Log current state for debugging
+  useEffect(() => {
+    console.log("Current bot settings:", bot.settings);
+    console.log("Local settings:", localSettings);
+  }, [bot.settings, localSettings]);
+
   return (
-    <Card className=" border-border">
+    <Card className="border-border">
       <CardHeader className="bg-gray-800 border-b-gray-700 border-border rounded-t-lg">
-        <CardTitle className="text-zinc-50">Configure Jenny Voice AI</CardTitle>
+        <CardTitle className="text-zinc-50">Configure {bot.name}</CardTitle>
         <CardDescription className="text-zinc-400">
-          Customize your voice assistant's behavior and voice
+          Customize your assistant's behavior and voice
         </CardDescription>
       </CardHeader>
       <form
@@ -86,12 +146,27 @@ export function VoiceAgentConfig() {
             >
               Voice
             </label>
-            <Select value={voice} onValueChange={setVoice}>
+            <Select
+              value={localSettings?.voice?.voiceId}
+              onValueChange={(value) => {
+                const selectedVoice = voiceOptions?.find(
+                  (v) => v.voiceId === value
+                );
+                setLocalSettings({
+                  ...localSettings,
+                  voice: {
+                    voiceId: selectedVoice?.voiceId || "",
+                    name: selectedVoice?.name || "",
+                    previewUrl: selectedVoice?.previewUrl || "",
+                  },
+                });
+              }}
+            >
               <SelectTrigger className="w-full bg-zinc-800 border-zinc-700">
                 <SelectValue placeholder="Select a voice" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-800 max-w-screen-sm">
-                {voiceOptions.map((option: any) => (
+                {voiceOptions?.map((option: VoiceOption) => (
                   <SelectItem key={option.voiceId} value={option.voiceId}>
                     {option.name}
                   </SelectItem>
@@ -108,8 +183,13 @@ export function VoiceAgentConfig() {
             </label>
             <Input
               id="phone-number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              value={localSettings.phoneNumber}
+              onChange={(e) =>
+                setLocalSettings({
+                  ...localSettings,
+                  phoneNumber: e.target.value,
+                })
+              }
               className="bg-zinc-800 border-zinc-700"
             />
           </div>
@@ -122,9 +202,14 @@ export function VoiceAgentConfig() {
             </label>
             <Textarea
               id="system-prompt"
-              placeholder="Enter the system prompt for Jenny AI..."
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
+              placeholder={`Enter the system prompt for ${bot.name}...`}
+              value={localSettings.systemPrompt}
+              onChange={(e) =>
+                setLocalSettings({
+                  ...localSettings,
+                  systemPrompt: e.target.value,
+                })
+              }
               rows={6}
               className="bg-zinc-800 border-zinc-700 overflow-y-auto"
             />
@@ -138,14 +223,32 @@ export function VoiceAgentConfig() {
           >
             Save Configuration
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleStartTwilioCall}
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white"
-          >
-            Start Twilio Call
-          </Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button" variant="destructive" className="flex-1">
+                Delete Assistant
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-zinc-900 text-white">
+              <DialogHeader>
+                <DialogTitle>Delete Assistant</DialogTitle>
+                <DialogDescription className="text-zinc-400">
+                  Are you sure you want to delete {bot.name}? This action cannot
+                  be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardFooter>
       </form>
     </Card>

@@ -18,7 +18,7 @@ export async function GET() {
 
     console.log(data);
 
-    return NextResponse.json(data);
+    return NextResponse.json(data.results);
   } catch (error) {
     console.error("Error fetching voices:", error);
     return NextResponse.json(
