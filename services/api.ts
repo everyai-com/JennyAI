@@ -16,7 +16,15 @@ export const apiService = {
     }
   },
 
-  createTwilioCall: async (phoneNumber: string) => {
+  createTwilioCall: async ({
+    phoneNumber,
+    systemPrompt,
+    voice,
+  }: {
+    phoneNumber: string;
+    systemPrompt: string;
+    voice: string;
+  }) => {
     try {
       const response = await fetch(`/api/tcall`, {
         method: "POST",
@@ -25,8 +33,8 @@ export const apiService = {
         },
         body: JSON.stringify({
           phoneNumber,
-          systemPrompt: useVoiceAgentStore.getState().systemPrompt,
-          voice: useVoiceAgentStore.getState().voice,
+          systemPrompt,
+          voice,
         }),
       });
       if (!response.ok) throw new Error("API call failed");
@@ -37,7 +45,13 @@ export const apiService = {
     }
   },
 
-  createCall: async () => {
+  createCall: async ({
+    systemPrompt,
+    voice,
+  }: {
+    systemPrompt: string;
+    voice: string;
+  }) => {
     try {
       const response = await fetch(`/api/call`, {
         method: "POST",
@@ -45,8 +59,8 @@ export const apiService = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          systemPrompt: useVoiceAgentStore.getState().systemPrompt,
-          voice: useVoiceAgentStore.getState().voice,
+          systemPrompt,
+          voice,
         }),
       });
       if (!response.ok) throw new Error("API call failed");
