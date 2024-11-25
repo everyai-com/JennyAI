@@ -1,15 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer, nextRuntime }) => {
-    if (!isServer && !nextRuntime) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        crypto: false,
-        stream: false,
-      };
-    }
-    return config;
-  },
+  // Remove the webpack config since we're not using Node.js modules anymore
 };
 
 export default nextConfig;
