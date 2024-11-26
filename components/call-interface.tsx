@@ -14,6 +14,7 @@ import { apiService } from "@/services/api";
 import { UltravoxSession } from "ultravox-client";
 import { Bot } from "@/store/bot-store";
 import { useToast } from "@/components/ui/use-toast";
+import { useBotStore } from "@/store/bot-store";
 
 interface CallInterfaceProps {
   bot: Bot;
@@ -28,15 +29,6 @@ export function CallInterface({ bot }: CallInterfaceProps) {
   const sessionRef = useRef<UltravoxSession | null>(null);
 
   const handleStartCall = async () => {
-    if (!bot.settings.phoneNumber) {
-      toast({
-        title: "Error",
-        description: "Please configure a phone number first",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsCallActive(true);
       setTranscript([]);
@@ -73,9 +65,6 @@ export function CallInterface({ bot }: CallInterfaceProps) {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    if (sessionRef.current) {
-      sessionRef.current.setMuted(!isMuted);
-    }
   };
 
   const addToTranscript = (message: string) => {
@@ -85,10 +74,17 @@ export function CallInterface({ bot }: CallInterfaceProps) {
   const handleTwilioCall = async () => {
     console.log("Twilio calling");
 
+    const tools = [];
+    if (bot.settings.appointmentBooking.enabled) {
+      tools.push("calendar");
+    }
+
     const call = await apiService.createTwilioCall({
       systemPrompt: bot.settings.systemPrompt || "",
       voice: bot.voice.voiceId || "",
       phoneNumber: bot.settings.phoneNumber || "",
+      tools,
+      appointmentBooking: bot.settings.appointmentBooking,
     });
 
     console.log(call);

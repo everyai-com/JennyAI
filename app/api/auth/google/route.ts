@@ -1,4 +1,5 @@
 import { generateAuthUrl } from "@/lib/google-calendar.config";
+
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -10,7 +11,7 @@ export async function GET() {
   } catch (error) {
     console.error("Google OAuth Error:", error);
     return NextResponse.json(
-      { error: "Failed to generate auth URL" },
+      { error: "Failed to initialize Google OAuth" },
       { status: 500 }
     );
   }

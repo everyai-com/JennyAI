@@ -73,3 +73,50 @@ export async function getEvent(accessToken: string, eventId: string) {
 
   return response.json();
 }
+
+interface CalendarEvent {
+  summary: string;
+  description: string;
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  attendees: { email: string }[];
+  reminders?: {
+    useDefault: boolean;
+  };
+  metadata?: {
+    status: string;
+  };
+}
+
+export async function createCalendarEvent(event: CalendarEvent) {
+  try {
+    const response = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.GOOGLE_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(event),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to create calendar event: ${response.statusText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating calendar event:", error);
+    throw error;
+  }
+}

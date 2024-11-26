@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:3001";
+import { Bot } from "@/store/bot-store";
 import { useVoiceAgentStore } from "@/stores/voiceAgentStore";
 
 export const apiService = {
@@ -20,12 +21,36 @@ export const apiService = {
     phoneNumber,
     systemPrompt,
     voice,
+    tools,
+    appointmentBooking,
   }: {
     phoneNumber: string;
     systemPrompt: string;
     voice: string;
+    tools: string[];
+    appointmentBooking: Bot["settings"]["appointmentBooking"];
   }) => {
     try {
+      if (appointmentBooking.enabled) {
+        tools.push("calendar");
+
+        const response = await fetch(`/api/call-with-tools`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber,
+            systemPrompt,
+            voice,
+            tools,
+          }),
+        });
+
+        if (!response.ok) throw new Error("API call failed");
+        return await response.json();
+      }
+
       const response = await fetch(`/api/tcall`, {
         method: "POST",
         headers: {
