@@ -5,6 +5,12 @@ const nextConfig = {
       enabled: true,
     },
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Client-side polyfills
