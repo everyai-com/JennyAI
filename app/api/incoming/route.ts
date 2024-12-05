@@ -9,7 +9,7 @@ export async function POST(_request: Request) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-Key": "VAfcW6VB.driGgc9PJQeIkhtcdOt5XVDhCncBNVfR",
+      "X-API-Key": "tpPvdGuM.oswYED3sO9DgtgmZoQioF38aDfHLdnbLi",
     },
     body: JSON.stringify({
       systemPrompt: `Hey you are lisa, representative of Atlas Dentic, 
